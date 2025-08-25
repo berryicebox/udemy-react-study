@@ -1,14 +1,12 @@
 import { Suspense } from 'react';
 import {
   useRouteLoaderData,
-  json,
   redirect,
-  defer,
   Await,
 } from 'react-router-dom';
-
 import EventItem from '../components/EventItem';
 import EventsList from '../components/EventsList';
+import { getAuthToken } from '../util/auth';
 
 function EventDetailPage() {
   const { event, events } = useRouteLoaderData('event-detail');
@@ -35,11 +33,9 @@ async function loadEvent(id) {
   const response = await fetch('http://localhost:8080/events/' + id);
 
   if (!response.ok) {
-    throw json(
-      { message: 'Could not fetch details for selected event.' },
-      {
-        status: 500,
-      }
+    throw new Response(
+      JSON.stringify({ message: 'Could not fetch event.' }),
+      { status: 500 }
     );
   } else {
     const resData = await response.json();
@@ -55,11 +51,9 @@ async function loadEvents() {
     // throw new Response(JSON.stringify({ message: 'Could not fetch events.' }), {
     //   status: 500,
     // });
-    throw json(
-      { message: 'Could not fetch events.' },
-      {
-        status: 500,
-      }
+    throw new Response(
+      JSON.stringify({ message: 'Could not fetch events.' }),
+      { status: 500 }
     );
   } else {
     const resData = await response.json();
@@ -70,24 +64,30 @@ async function loadEvents() {
 export async function loader({ request, params }) {
   const id = params.eventId;
 
-  return defer({
-    event: await loadEvent(id),
-    events: loadEvents(),
-  });
+    // 두 fetch를 병렬로 실행
+  const [event, events] = await Promise.all([
+    loadEvent(id),
+    loadEvents(),
+  ]);
+
+  return { event, events };
 }
 
 export async function action({ params, request }) {
   const eventId = params.eventId;
+
+  const token = getAuthToken();
   const response = await fetch('http://localhost:8080/events/' + eventId, {
     method: request.method,
+    headers: {
+      'Authorization': 'Bearer ' + token,
+    },
   });
 
   if (!response.ok) {
-    throw json(
-      { message: 'Could not delete event.' },
-      {
-        status: 500,
-      }
+    throw new Response(
+      JSON.stringify({ message: 'Could not delete event.' }),
+      { status: 500 }
     );
   }
   return redirect('/events');
