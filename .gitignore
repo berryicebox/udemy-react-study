@@ -1,2 +1,5 @@
 /react-auth/01-starting-project/frontend/node_modules
 /react-auth/01-starting-project/backend/node_modules
+
+/react-deployment/01-starting-project/node_modules
+/react-deployment/01-starting-project/build
