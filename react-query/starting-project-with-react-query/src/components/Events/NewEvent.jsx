@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 
 import Modal from '../UI/Modal.jsx';
 import EventForm from './EventForm.jsx';
+import ErrorBlock from '../UI/ErrorBlock.jsx';
 import { createNewEvent } from '../../utils/http.js';
 
 export default function NewEvent() {
@@ -19,14 +20,26 @@ export default function NewEvent() {
   return (
     <Modal onClose={() => navigate('../')}>
       <EventForm onSubmit={handleSubmit}>
-        <>
-          <Link to="../" className="button-text">
-            Cancel
-          </Link>
-          <button type="submit" className="button">
-            Create
-          </button>
-        </>
+        {isPending && 'Submitting...'}
+        {!isPending && (
+          <>
+            <Link to="../" className="button-text">
+              Cancel
+            </Link>
+            <button type="submit" className="button">
+              Create
+            </button>
+          </>
+        )}
+        {isError && (
+          <ErrorBlock
+            title="Failed to create event"
+            message={
+              error.info?.message ||
+              'Something went wrong. Please try again later.'
+            }
+          />
+        )}
       </EventForm>
     </Modal>
   );
