@@ -30,3 +30,15 @@ let anotherPerson: Person = {
 function printOutput(value: string | number): void {
   console.log(value);
 }
+
+// Generics
+
+function insertAtBeginning<T>(array: T[], value: T){
+  const newArray = [value, ...array];
+  return newArray;
+}
+
+const demoArray = [1,2,3];
+const updatedArray = insertAtBeginning(demoArray, -1); // [-1,1,2,3]
+
+updatedArray[0].split(''); // 오류 발생
